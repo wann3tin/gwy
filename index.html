@@ -59,6 +59,12 @@ textarea:focus{outline:none;border-color:#0F6E56;box-shadow:0 0 0 3px rgba(15,11
 .slider b{width:26px;text-align:right;font-size:13px;color:#0F6E56;font-variant-numeric:tabular-nums}
 .switch{display:flex;align-items:center;gap:9px;font-size:14px;color:#3A3A34;padding:10px 0}
 .switch input{width:22px;height:22px;accent-color:#0F6E56}
+.fwide{padding:9px 0;border-bottom:1px solid #F1F1EA}
+.fwide:last-child{border-bottom:none}
+.fwide > label{display:block;font-size:14px;color:#3A3A34;margin-bottom:6px}
+.fwide > label small{display:block;font-size:11px;color:#9A9A92;font-weight:400}
+.fwide input[type=text]{width:100%;min-height:42px;padding:6px 10px;border:1px solid #DCDCD4;border-radius:10px;background:#FCFCFA;color:#1E1E1C}
+.fwide input[type=text]:focus{outline:none;border-color:#0F6E56}
 
 /* ---------- 岗位卡 ---------- */
 .job{background:#fff;border:1px solid #E2E2DA;border-radius:16px;padding:12px 14px;margin-bottom:10px;transition:transform .1s,border-color .15s}
@@ -259,6 +265,83 @@ table.mini tr:last-child td{border-bottom:none}
     </div>
 
     <div class="card">
+      <div class="h2"><span class="dot"></span>个人档案<span class="r">性别 / 党员 / 户籍不符 → 自动判不可报</span></div>
+      <div class="field">
+        <label>性别<small>不填则按「需确认」处理</small></label>
+        <select id="pGender">
+          <option value="" selected>不填</option>
+          <option>男</option>
+          <option>女</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>政治面貌</label>
+        <select id="pPolitics">
+          <option>群众</option>
+          <option>共青团员</option>
+          <option>预备党员</option>
+          <option>中共党员</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>年龄<small>周岁</small></label>
+        <input type="number" id="pAge" value="27" min="16" max="60" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>最高学历</label>
+        <select id="pEdu">
+          <option>大专</option>
+          <option selected>本科</option>
+          <option>硕士</option>
+          <option>博士</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>学位</label>
+        <select id="pDegree">
+          <option value="">无</option>
+          <option selected>学士</option>
+          <option>硕士</option>
+          <option>博士</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>是否应届毕业生</label>
+        <select id="pFresh">
+          <option value="0" selected>否（已就业）</option>
+          <option value="1">是</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>基层工作年限<small>企业经历可计入</small></label>
+        <input type="number" id="pGrass" value="4" min="0" max="40" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>户籍 / 生源城市</label>
+        <select id="pHukou">
+          <option value="baotou" selected>包头</option>
+          <option value="eerduosi">鄂尔多斯</option>
+          <option value="wuhai">乌海</option>
+          <option value="alxa">阿拉善</option>
+          <option value="huhehaote">呼和浩特</option>
+          <option value="bayannaoer">巴彦淖尔</option>
+          <option value="other">其他（均不符）</option>
+        </select>
+      </div>
+      <div class="fwide">
+        <label>我的专业<small>顿号分隔，可写大类；与职位「专业」列做包含匹配</small></label>
+        <input type="text" id="pMajor" value="计算机科学与技术、软件工程、计算机类、电子信息类">
+      </div>
+      <div class="field">
+        <label>最长可接受服务年限<small>超过判不可报</small></label>
+        <input type="number" id="pMaxService" value="5" min="0" max="10" inputmode="numeric">
+      </div>
+      <label class="switch"><input type="checkbox" id="pFitnessOK">接受体能测评岗位</label>
+      <label class="switch"><input type="checkbox" id="pRemoteOK">接受艰苦边远地区</label>
+      <label class="switch"><input type="checkbox" id="pTownOK">接受苏木乡镇岗位</label>
+    </div>
+
+    <div class="card">
       <div class="h2"><span class="dot"></span>城市数据与系数<span class="r">公告一变就改这里</span></div>
       <div id="paramsBody"></div>
       <div class="note">
@@ -273,7 +356,7 @@ table.mini tr:last-child td{border-bottom:none}
   <section class="view" id="v-list">
     <div class="card" style="padding:12px 16px">
       <div class="h2" style="margin:0"><span class="dot"></span>候选排序<span class="r" id="listCount">—</span></div>
-      <div class="note" style="margin-top:6px">不可报或超远距离的岗位自动置底、不计排名。点任意岗位查看档案与测算。</div>
+      <div class="note" style="margin-top:6px">按「个人档案」自动判定可报性：性别、党员、应届、户籍、学历等不符的岗位置底、不计排名。点任意岗位查看档案与测算。</div>
     </div>
     <div id="listWrap"></div>
   </section>
@@ -503,6 +586,44 @@ var SAMPLE = [
 var STATE = {rows:[], sel:null, home:'baotou', myScore:65, w:[40,40,20], floor:55, far:400};
 var UID = 0, EDIT = false, TAB = 'import';
 
+/* 个人档案：资格体检的判定依据（与桌面版同一套） */
+var PROFILE = {gender:'', politics:'群众', age:27, edu:'本科', degree:'学士', fresh:false,
+  grassYears:4, hukou:'baotou', major:'计算机科学与技术、软件工程、计算机类、电子信息类',
+  acceptFitness:false, acceptRemote:false, acceptTown:false, maxService:5};
+var EDU_RANK = {'大专':1, '本科':2, '硕士':3, '博士':4};
+var DEG_RANK = {'':0, '学士':2, '硕士':3, '博士':4};
+
+function readProfile(){
+  var gv = g('pGender');   if(gv) PROFILE.gender = gv.value || '';
+  var pv = g('pPolitics'); if(pv && pv.value) PROFILE.politics = pv.value;
+  PROFILE.age = num('pAge', 27);
+  var ev = g('pEdu');      if(ev && ev.value) PROFILE.edu = ev.value;
+  var dv = g('pDegree');   PROFILE.degree = dv ? dv.value : '';
+  var fv = g('pFresh');    PROFILE.fresh = !!(fv && fv.value === '1');
+  PROFILE.grassYears = num('pGrass', 4);
+  var hv = g('pHukou');    if(hv && hv.value) PROFILE.hukou = hv.value;
+  var mjv = g('pMajor');   if(mjv) PROFILE.major = mjv.value || '';
+  PROFILE.acceptFitness = !!(g('pFitnessOK') && g('pFitnessOK').checked);
+  PROFILE.acceptRemote  = !!(g('pRemoteOK') && g('pRemoteOK').checked);
+  PROFILE.acceptTown    = !!(g('pTownOK') && g('pTownOK').checked);
+  PROFILE.maxService = num('pMaxService', 5);
+}
+function syncProfileInputs(){
+  var a = g('pGender');    if(a) a.value = PROFILE.gender;
+  var b = g('pPolitics');  if(b) b.value = PROFILE.politics;
+  var c = g('pAge');       if(c) c.value = PROFILE.age;
+  var d = g('pEdu');       if(d) d.value = PROFILE.edu;
+  var e = g('pDegree');    if(e) e.value = PROFILE.degree;
+  var f = g('pFresh');     if(f) f.value = PROFILE.fresh ? '1' : '0';
+  var h = g('pGrass');     if(h) h.value = PROFILE.grassYears;
+  var i = g('pHukou');     if(i) i.value = PROFILE.hukou;
+  var j = g('pMajor');     if(j) j.value = PROFILE.major;
+  var k = g('pFitnessOK'); if(k) k.checked = PROFILE.acceptFitness;
+  var l = g('pRemoteOK');  if(l) l.checked = PROFILE.acceptRemote;
+  var m = g('pTownOK');    if(m) m.checked = PROFILE.acceptTown;
+  var n = g('pMaxService');if(n) n.value = PROFILE.maxService;
+}
+
 /* ============ 2. 解析 ============ */
 function norm(s){
   return str(s).replace(/[\s\u3000]/g,'').replace(/[（）()【】\[\]]/g,'')
@@ -674,53 +795,108 @@ function scoreParts(r){
   s += kAdj;
   return {val: Math.round(s*10)/10, lvAdj:(r.level==='盟市直'?2.5:(r.level==='旗县'?0:-5.5)), mjAdj:mjAdj, kAdj:kAdj};
 }
+function majorTokens(m){
+  return str(m).split(/[、,，;；/／\s]+/).map(function(s){ return norm(s); }).filter(Boolean);
+}
+function majorMatch(jobMj){
+  var jm = norm(jobMj);
+  if(jm === '' || /不限|无限制/.test(jm)) return {open:true};
+  var toks = majorTokens(PROFILE.major);
+  for(var i=0;i<toks.length;i++){
+    var cands = [toks[i], toks[i].replace(/(科学与技术|工程技术|工程|技术|类|学)$/,'')];
+    for(var j=0;j<cands.length;j++){
+      var c = cands[j];
+      if(c.length >= 2 && jm.indexOf(c) >= 0) return {ok:true};
+    }
+  }
+  return {ok:false};
+}
+function ageLimitOf(r){
+  var txt = str(r.other) + ' ' + str(r.remark) + ' ' + str(r.posDesc);
+  var m = txt.match(/(\d+)\s*周岁以下|(?:不超过|年龄不超过)\s*(\d+)\s*周岁/);
+  return m ? parseInt(m[1] || m[2], 10) : 0;
+}
 function eligibility(r){
   var out = [];
   function add(name, status, note){ out.push({name:name, status:status, note:note || ''}); }
-  var edu = str(r.edu), deg = str(r.degree), mj = str(r.major), hk = str(r.hukou);
 
-  if(/硕士|研究生|博士/.test(edu) && !/本科/.test(edu)) add('学历','bad','要求「'+edu+'」，本科不符合');
-  else add('学历','ok', edu || '未填写');
+  var edu = str(r.edu);
+  var needEdu = /博士/.test(edu) ? 4 : (/硕士|研究生/.test(edu) && !/本科/.test(edu) ? 3 : (/本科/.test(edu) ? 2 : (/大专|专科/.test(edu) ? 1 : 0)));
+  var myEdu = EDU_RANK[PROFILE.edu] || 2;
+  if(needEdu > myEdu) add('学历','bad','要求「' + (edu || '未填写') + '」，你的最高学历为 ' + PROFILE.edu);
+  else add('学历','ok', edu ? ('要求 ' + edu + '，你是 ' + PROFILE.edu) : '未填写');
 
-  if(/博士|硕士/.test(deg) && !/学士/.test(deg)) add('学位','bad','要求「'+deg+'」');
-  else add('学位','ok', deg || '未填写');
+  var deg = str(r.degree);
+  var needDeg = /博士/.test(deg) ? 4 : (/硕士/.test(deg) && !/学士/.test(deg) ? 3 : (/学士/.test(deg) ? 2 : 0));
+  var myDeg = DEG_RANK[PROFILE.degree] || 0;
+  if(needDeg > myDeg) add('学位','bad','要求「' + deg + '」，你的学位为' + (PROFILE.degree || '无'));
+  else add('学位','ok', deg ? ('要求 ' + deg + '，符合') : '未填写');
 
-  if(mj === '' || /不限|无限制/.test(mj)) add('专业','warn','专业不限，竞争基数最大');
-  else if(CS_RE.test(mj)) add('专业','ok','与计算机科学与技术对口，可筛掉大部分竞争者');
-  else add('专业','bad','限定「'+mj+'」，需核对专业目录');
+  var mm = majorMatch(r.major);
+  if(mm.open) add('专业','warn','专业不限，竞争基数最大');
+  else if(mm.ok) add('专业','ok','限定「' + str(r.major) + '」，与你的专业匹配');
+  else add('专业','bad','限定「' + str(r.major) + '」，你的专业（' + PROFILE.major + '）不在列');
 
-  if(isYes(r.freshOnly)) add('应届身份','bad','仅限应届毕业生，你已正式就业，不符合');
-  else add('应届身份','ok','不限应届');
+  if(isYes(r.freshOnly)){
+    if(PROFILE.fresh) add('应届身份','ok','仅限应届，你是应届毕业生');
+    else add('应届身份','bad','仅限应届高校毕业生，档案显示你已就业');
+  } else add('应届身份','ok','不限应届，社会人员可报');
 
-  if(hk === '' || /不限/.test(hk)) add('户籍','ok','不限户籍');
-  else if(hk.indexOf(HN[STATE.home]) >= 0) add('户籍','ok','限「'+hk+'」，你符合');
-  else if(/本盟市|本市|本地/.test(hk) && r.city === STATE.home) add('户籍','ok','限本地户籍/生源，你符合');
-  else add('户籍','bad','限「'+hk+'」，你为'+HN[STATE.home]+'户籍/生源');
+  var hk = str(r.hukou), myHK = HN[PROFILE.hukou] || '其他城市';
+  if(hk === '' || /不限/.test(norm(hk))) add('户籍','ok','不限户籍');
+  else if(hk.indexOf(myHK) >= 0) add('户籍','ok','限「' + hk + '」，你的户籍/生源为' + myHK);
+  else if(/本盟市|本市|本地/.test(hk) && r.city === PROFILE.hukou) add('户籍','ok','限本地户籍/生源，你符合');
+  else add('户籍','bad','限「' + hk + '」，你的户籍/生源为' + myHK);
 
   var gy = yearsOf(r.grassYears);
-  if(gy > 4) add('基层经历','bad','要求 '+gy+' 年，你约 4 年');
-  else if(gy >= 2) add('基层经历','ok','要求 '+gy+' 年，企业经历可计入');
+  if(gy > PROFILE.grassYears) add('基层经历','bad','要求 ' + gy + ' 年，你的档案为 ' + PROFILE.grassYears + ' 年');
+  else if(gy >= 2) add('基层经历','ok','要求 ' + gy + ' 年，你的 ' + PROFILE.grassYears + ' 年企业经历可计入');
   else add('基层经历','ok','不限基层经历');
 
-  if(/党员/.test(str(r.politics))) add('政治面貌','warn','要求「'+str(r.politics)+'」，非党员不可报');
-  else add('政治面貌','ok', str(r.politics) || '不限');
+  var pol = str(r.politics);
+  if(/中共党员/.test(pol) && PROFILE.politics.indexOf('党员') < 0) add('政治面貌','bad','要求中共党员，你是' + PROFILE.politics);
+  else if(/共青团员/.test(pol) && /党员/.test(PROFILE.politics)) add('政治面貌','ok','要求「' + pol + '」，党员身份覆盖');
+  else if(/共青团员/.test(pol) && PROFILE.politics !== '共青团员') add('政治面貌','bad','要求「' + pol + '」，你是' + PROFILE.politics);
+  else add('政治面貌','ok', pol ? ('要求 ' + pol + '，符合') : '不限');
 
-  if(/男|女/.test(str(r.gender))) add('性别','warn','限「'+str(r.gender)+'」，需本人符合');
-  else add('性别','ok','不限性别');
+  var gd = str(r.gender).trim();
+  if(/男|女/.test(gd)){
+    if(!PROFILE.gender) add('性别','warn','限「' + gd + '」，请在个人档案填写性别后自动判定');
+    else if(gd === PROFILE.gender) add('性别','ok','限「' + gd + '」，你是' + PROFILE.gender);
+    else add('性别','bad','限「' + gd + '」，你是' + PROFILE.gender);
+  } else add('性别','ok','不限性别');
 
-  if(isYes(r.fitness)) add('体能测评','warn','需体测，建议提前 4 周训练');
-  if(isYes(r.policeTech)) add('警务技术','warn','按人民警察体检标准执行');
-  if(isYes(r.proTest)) add('专业测试','warn','面试阶段有专业能力测试');
+  if(isYes(r.fitness)){
+    if(PROFILE.acceptFitness) add('体能测评','ok','需体测，你已确认接受（建议提前 4 周训练）');
+    else add('体能测评','bad','需体能测评，个人档案未勾选「接受体能测评岗位」');
+  }
+
+  if(isYes(r.remote)){
+    if(PROFILE.acceptRemote) add('艰苦边远','ok','艰苦边远地区岗位，你已确认接受');
+    else add('艰苦边远','bad','艰苦边远地区岗位，个人档案未勾选「接受艰苦边远地区」');
+  }
+
+  if(r.level === '苏木乡镇' && !PROFILE.acceptTown) add('岗位层级','bad','苏木乡镇岗位，个人档案未勾选「接受苏木乡镇岗位」');
 
   var sy = yearsOf(r.serviceYears);
-  if(sy >= 5) add('服务年限','warn','最低服务 '+sy+' 年，期间不得调动、不得参加遴选');
+  if(sy > PROFILE.maxService) add('服务年限','bad','最低服务 ' + sy + ' 年，超过你设定的上限 ' + PROFILE.maxService + ' 年');
+  else if(sy > 0) add('服务年限','warn','最低服务 ' + sy + ' 年，期间不得调动、不得参加遴选');
+
+  var needAge = ageLimitOf(r);
+  if(needAge > 0){
+    if(PROFILE.age > needAge) add('年龄','bad','要求 ' + needAge + ' 周岁以下，你 ' + PROFILE.age + ' 岁');
+    else add('年龄','ok','要求 ' + needAge + ' 周岁以下，你 ' + PROFILE.age + ' 岁，符合');
+  }
+
+  if(isYes(r.policeTech)) add('警务技术','warn','按人民警察体检标准执行');
+  if(isYes(r.proTest)) add('专业测试','warn','面试阶段有专业能力测试');
 
   var or = str(r.openRatio).match(/(\d+(?:\.\d+)?)\s*[:：]\s*(\d+)/);
   if(or){
     var hc = parseInt(r.headcount,10) || 1;
     add('开考比例','warn','需至少 '+(parseFloat(or[1])*hc)+' 人报名，否则岗位取消或核减');
   }
-  if(str(r.other).trim() !== '') add('其他条件','warn', str(r.other));
+  if(str(r.other).trim() !== '' && needAge <= 0) add('其他条件','warn', str(r.other));
   return out;
 }
 function distScore(d){
@@ -1015,6 +1191,7 @@ function renderParams(){
 
 function renderAll(skipParams){
   readParams();
+  readProfile();
   recomputeAll();
   if(!cur() && STATE.rows.length) STATE.sel = ranked()[0].id;
   renderChips();
@@ -1056,7 +1233,8 @@ function save(){
       return o;
     });
     localStorage.setItem('nmg_workbench_ipad', JSON.stringify({
-      rows: rows, p:{myScore:STATE.myScore, home:STATE.home, w:STATE.w, floor:STATE.floor, far:STATE.far}
+      rows: rows, p:{myScore:STATE.myScore, home:STATE.home, w:STATE.w, floor:STATE.floor, far:STATE.far},
+      profile: PROFILE
     }));
   }catch(e){}
 }
@@ -1074,6 +1252,11 @@ function loadSaved(){
       found = true;
     }
     if(o && o.rows){ STATE.rows = o.rows.map(function(f){ return makeRow(f); }); found = true; }
+    if(o && o.profile){
+      for(var k in PROFILE){
+        if(o.profile[k] !== undefined) PROFILE[k] = o.profile[k];
+      }
+    }
     return found;
   }catch(e){}
   return false;
@@ -1147,7 +1330,9 @@ function bind(){
   var be = g('btnExport');
   if(be) be.addEventListener('click', exportCSV);
 
-  ['myScore','home','w1','w2','w3','floor','far','ownHouse'].forEach(function(id){
+  ['myScore','home','w1','w2','w3','floor','far','ownHouse',
+   'pGender','pPolitics','pAge','pEdu','pDegree','pFresh','pGrass','pHukou','pMajor',
+   'pFitnessOK','pRemoteOK','pTownOK','pMaxService'].forEach(function(id){
     var el = g(id);
     if(!el) return;
     el.addEventListener('input', function(){ renderAll(true); });
@@ -1246,6 +1431,7 @@ function exportCSV(){
 function boot(){
   var loaded = loadSaved();
   syncInputs();
+  syncProfileInputs();
   readParams();
   if(!loaded) loadSample();
   bind();
@@ -1259,7 +1445,8 @@ function boot(){
 if(document.readyState !== 'loading') boot();
 else if(document.addEventListener) document.addEventListener('DOMContentLoaded', boot);
 
-var API = {STATE:STATE, CITY:CITY, ratioParts:ratioParts, scoreParts:scoreParts, eligibility:eligibility,
+var API = {STATE:STATE, PROFILE:PROFILE, CITY:CITY, ratioParts:ratioParts, scoreParts:scoreParts, eligibility:eligibility,
+  majorMatch:majorMatch, ageLimitOf:ageLimitOf,
   scoreOf:scoreOf, distScore:distScore, cashFor:cashFor, pmt:pmt, parsePaste:parsePaste,
   makeRow:makeRow, recompute:recompute, ranked:ranked, showTab:showTab, boot:boot};
 if(typeof globalThis !== 'undefined') globalThis.__W = API;
